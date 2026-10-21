@@ -1,0 +1,10 @@
+.env
+
+__pycache__/
+backend/staticfiles/
+backend/media
+
+node_modules/
+frontend/dist/
+.wrangler/
+

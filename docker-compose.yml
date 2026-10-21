@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: kento
+      POSTGRES_USER: kento
+      POSTGRES_PASSWORD: kento
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresdb:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kento"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file: ./backend/.env
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgresdb:

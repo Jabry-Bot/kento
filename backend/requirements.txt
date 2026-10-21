@@ -1,0 +1,13 @@
+Django>=5.2,<5.3
+djangorestframework>=3.16
+djangorestframework-simplejwt>=5.5
+django-cors-headers>=4.7
+django-filter>=25.1
+django-storages[s3]>=1.14
+dj-database-url>=2.3
+psycopg[binary]>=3.2
+gunicorn>=23
+whitenoise>=6.9
+google-auth>=2.40
+requests>=2.32
+Pillow>=11
