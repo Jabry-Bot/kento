@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/*Los colores son inspirados de una web de un cliente del trabajo*/
+/*Son aproximaciones de como quiero que quede*/
+@theme {
+  --color-primario: #c4321a;
+
+  --color-secundario: #15171c;
+
+  --color-fondo: #f4f4f1;
+
+  --color-superficie: #ffffff;
+
+  --color-tinta: #15171c;
+
+  --color-tenue: #5b6170;
+
+  --color-borde: #e3e4e0;
+}
