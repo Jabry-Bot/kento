@@ -40,3 +40,38 @@ jobs:
       - run: python manage.py check
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+
+      - name: Migrar base de datos
+        run: python manage.py migrate --noinput
+        env:
+          SECRET_KEY: ci
+          NAME_DB: kentodb
+          USER_DB: kentodb_owner
+          PASSWORD_DB: ${{ secrets.PASSWORD_DB }}
+          HOST_DB: ${{ secrets.HOST_DB_DIRECTO }}
+          SSLMODE_DB: require
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Desplegar en Cloud Run
+        run: gcloud run deploy kento-api --source . --region europe-west3 --quiet
+
+
