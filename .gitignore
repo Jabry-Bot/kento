@@ -1,5 +1,5 @@
 .env
-
+.http
 __pycache__/
 backend/staticfiles/
 backend/media

@@ -72,7 +72,7 @@ INSTALLED_APPS = [
 ]
 
 # El orden importa. No entendia porque el navegador me bloqueaba los CORS.
-# La solucion es que consulte los CORS antes de que pase por el commonMiddleware
+# La solucion es que consulte los CORS antes de que pase por el commonMiddleware.sssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     # para el static files del panel del admin en Cloud Run
