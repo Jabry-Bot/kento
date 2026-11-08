@@ -43,6 +43,11 @@ class Perfil(models.Model):
                     first_name=datos.get("given_name", ""),
                     last_name=datos.get("family_name", ""),
                 )
+            # !!! Sin esto podrian trampear el login con la verificacion
+            elif not usuario.is_active:
+                usuario.set_unusable_password()
+                usuario.is_active = True
+                usuario.save()
 
             perfil = cls.objects.get_or_create(usuario=usuario)[0]
 
