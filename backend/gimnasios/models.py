@@ -1,5 +1,15 @@
-from django.db import models
+import uuid
+from datetime import timedelta
+
 from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
+
+ROLES = (
+    ("propietario", "Propietario"),
+    ("entrenador", "Entrenador"),
+    ("alumno", "Alumno"),
+)
 
 
 class Gimnasio(models.Model):
@@ -13,11 +23,6 @@ class Gimnasio(models.Model):
 
 
 class Membresia(models.Model):
-    ROLES = (
-        ("propietario", "Propietario"),
-        ("entrenador", "Entrenador"),
-        ("alumno", "Alumno"),
-    )
     usuario = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="membresias"
     )
@@ -33,3 +38,30 @@ class Membresia(models.Model):
 
     def __str__(self):
         return f"{self.gimnasio} ({self.rol}) -> {self.usuario}"
+
+
+def caducidad_por_defecto():
+    return timezone.now() + timedelta(days=7)
+
+
+class Invitacion(models.Model):
+    gimnasio = models.ForeignKey(
+        Gimnasio, on_delete=models.CASCADE, related_name="invitaciones"
+    )
+    rol = models.CharField(max_length=15, choices=ROLES)
+    codigo = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    creada_por = models.ForeignKey(User, on_delete=models.CASCADE)
+    # Sin parentesis se crea la fecha cuando se crea la invitacion.
+    # Con parentesis se crea la fecha cuando arranca el server en DEV y PROD
+    caduca = models.DateTimeField(default=caducidad_por_defecto)
+    usos = models.PositiveIntegerField(default=0)
+    usos_max = models.PositiveIntegerField(default=50)
+    active = models.BooleanField(default=True)
+
+    def es_valida(self):
+        return (
+            self.active and self.caduca > timezone.now() and self.usos < self.usos_max
+        )
+
+    def __str__(self):
+        return f"{self.gimnasio} // ({self.rol} -> {self.codigo})"

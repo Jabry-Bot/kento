@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Gimnasio, Membresia
+from .models import *
 
 
 class GimnasioSerializer(serializers.ModelSerializer):
@@ -15,3 +15,10 @@ class MembresiaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membresia
         fields = ["id", "rol", "gimnasio"]
+
+
+class InvitacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitacion
+        fields = ["id", "rol", "codigo", "caduca", "usos_max", "usos", "active"]
+        read_only_fields = ["codigo", "usos", "active"]
