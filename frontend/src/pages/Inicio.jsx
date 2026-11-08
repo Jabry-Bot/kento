@@ -1,36 +1,51 @@
 import { useEffect, useState } from 'react'
 import { useSesion } from '../stores/useSesion'
-
-const url = `${import.meta.env.VITE_API_URL}/api/health/`
+import { acceder } from '../api/cliente'
+import { SinGimnasio } from '../components/SinGimnasio'
 
 export const Inicio = () => {
-  const [estado, setEstado] = useState('Cargando...')
   const usuario = useSesion((sesion) => sesion.usuario)
   const logout = useSesion((sesion) => sesion.logout)
+  const [membresias, setMembresias] = useState(null)
 
   useEffect(() => {
-    const probarApi = async () => {
-      try {
-        const resp = await fetch(url)
-        const data = await resp.json()
-        setEstado(`API: ${data.status}`)
-      } catch (error) {
-        console.log(error)
-        setEstado('API sin conexion')
-      }
+    const cargarGimnasios = async () => {
+      const resp = await acceder('/api/gimnasios/')
+      setMembresias(await resp.json())
     }
-    probarApi()
+
+    cargarGimnasios()
   }, [])
 
+  const alCrear = (gimnasio) => {
+    setMembresias([{ id: gimnasio.id, rol: 'propietario', gimnasio }])
+  }
+
+  if (membresias === null) {
+    return <p className="p-6 text-tenue">Cargando...</p>
+  }
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-fondo flex-col gap-2">
-      <h1 className="text-4xl font-bold text-primario">Kento</h1>
-      <hr className="w-40 border-tinta" />
-      <p className="text-tenue">{estado}</p>
-      <p className="text-tinta">Hola, {usuario?.first_name}</p>
-      <button onClick={logout} className="rounded bg-primario px-4 py-2 text-white">
-        Salir
-      </button>
+    <main className="flex min-h-screen flex-col items-center gap-6 bg-fondo p-6">
+      <header className="flex w-full max-w-sm items-center justify-between">
+        <p className="text-tinta">Hola, {usuario?.first_name}</p>
+        <button onClick={logout} className="text-tenue underline">
+          Cerrar Sesion
+        </button>
+      </header>
+
+      {membresias.length === 0 ? (
+        <SinGimnasio alCrear={alCrear} />
+      ) : (
+        <ul className="flex w-full max-w-sm flex-col gap-2">
+          {membresias.map((membresia) => (
+            <li key={membresia.id} className="rounded border border-borde bg-superficie p-3">
+              <p className="font-bold text-tinta"> {membresia.gimnasio.nombre}</p>
+              <p className=" text-tenue"> {membresia.rol}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   )
 }
