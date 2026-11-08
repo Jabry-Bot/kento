@@ -30,6 +30,10 @@ export const Inicio = () => {
     <main className="flex min-h-screen flex-col items-center gap-6 bg-fondo p-6">
       <header className="flex w-full max-w-sm items-center justify-between">
         <p className="text-tinta">Hola, {usuario?.first_name}</p>
+        <Link to="/perfil" className="text-tenue underline">
+          Mi perfil
+        </Link>
+
         <button onClick={logout} className="text-tenue underline">
           Cerrar Sesion
         </button>
