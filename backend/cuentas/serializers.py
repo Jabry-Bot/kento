@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.utils import timezone
+from django.contrib.auth import password_validation
+
 
 from .models import Perfil
 
@@ -27,8 +29,37 @@ class FichaSerializer(serializers.ModelSerializer):
         model = Perfil
         fields = ["fecha_nacimiento", "sexo", "peso"]
 
-    def validate_fecha_nacimiento(self,valor):
+    def validate_fecha_nacimiento(self, valor):
         if valor and valor > timezone.localdate():
-            raise serializers.ValidationError("La fecha de nacimiento no puede ser futura")
+            raise serializers.ValidationError(
+                "La fecha de nacimiento no puede ser futura"
+            )
         return valor
 
+
+class RegistroSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email", "password", "first_name", "last_name"]
+        extra_kwargs = {
+            "email": {"required": True},
+            "first_name": {"required": True},
+            "password": {"write_only": True},
+        }
+
+    def validate_email(self, valor):
+        valor = valor.lower()
+        if User.objects.filter(email__iexact=valor).exists():
+            raise serializers.ValidationError("Ya hay una cuenta con este email")
+        return valor
+
+    def validate_password(self, valor):
+        password_validation.validate_password(valor)
+        return valor
+
+    def create(self, datos):
+        usuario = User.objects.create_user(
+            username=datos["email"], is_active=False, **datos
+        )
+        Perfil.objects.create(usuario=usuario)
+        return usuario

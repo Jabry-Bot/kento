@@ -52,6 +52,16 @@ FRONTEND_URL = get_env("FRONTEND_URL", "http://localhost:5173")
 # Verificamos el login
 GOOGLE_CLIENT_ID = get_env("GOOGLE_CLIENT_ID", "")
 
+EMAIL_BACKEND = get_env(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = get_env("EMAIL_HOST", "")
+EMAIL_PORT = int(get_env("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = get_env("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = get_env("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = get_env("DEFAULT_FROM_EMAIL", "Kento <no-reply@kentoapp.es>")
+
 # Application definition
 
 INSTALLED_APPS = [
