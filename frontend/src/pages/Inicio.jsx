@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSesion } from '../stores/useSesion'
 import { acceder } from '../api/cliente'
 import { SinGimnasio } from '../components/SinGimnasio'
+import { Link } from 'react-router'
 
 export const Inicio = () => {
   const usuario = useSesion((sesion) => sesion.usuario)
@@ -39,9 +40,14 @@ export const Inicio = () => {
       ) : (
         <ul className="flex w-full max-w-sm flex-col gap-2">
           {membresias.map((membresia) => (
-            <li key={membresia.id} className="rounded border border-borde bg-superficie p-3">
-              <p className="font-bold text-tinta"> {membresia.gimnasio.nombre}</p>
-              <p className=" text-tenue"> {membresia.rol}</p>
+            <li key={membresia.id}>
+              <Link
+                to={`/gimnasios/${membresia.gimnasio.id}`}
+                className="block rounded border border-borde bg-superficie p-3"
+              >
+                <p className="font-bold text-tinta"> {membresia.gimnasio.nombre}</p>
+                <p className=" text-tenue"> {membresia.rol}</p>
+              </Link>
             </li>
           ))}
         </ul>
