@@ -1,18 +1,22 @@
 import { GoogleLogin } from '@react-oauth/google'
 import { useState } from 'react'
-import { acceder } from '../api/cliente'
+import { acceder, primerError } from '../api/cliente'
 import { useSesion } from '../stores/useSesion'
+import { PantallaAcceso } from '../components/PantallaAcceso'
+import { useForm } from '../hooks/useForm'
+import { Link } from 'react-router'
 
 export const Login = () => {
   const login = useSesion((sesion) => sesion.login)
+  const { email, password, formState, onInputChange } = useForm({ email: '', password: '' })
   const [error, setError] = useState(null)
 
-  const entrar = async ({ credential }) => {
+  const entrar = async (ruta, body) => {
     const resp = await acceder(
-      '/api/cuentas/google/',
+      ruta,
       {
         method: 'POST',
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify(body),
       },
       false,
     )
@@ -26,14 +30,52 @@ export const Login = () => {
     login(datos)
   }
 
+  const entrarEmail = (e) => {
+    e.preventDefault()
+    entrar('api/cuentas/login/', formState)
+  }
+
   return (
-    <main className="bg-amber-200">
-      <h1>Kento</h1>
+    <PantallaAcceso titulo="Iniciar sesión">
       <GoogleLogin
-        onSuccess={entrar}
-        onError={() => setError('No se ha podido iniciar sesion en Google')}
+        onSuccess={({ credential }) => entrar('/api/cuentas/google/', { credential })}
+        onError={() => setError('No se ha podido iniciar sesión con Google')}
       />
-      {error && <p className="border-secundario bg-tinta text-primario">{error}</p>}
-    </main>
+
+      <p className="text-center text-tenue">o con tu email</p>
+
+      <form onSubmit={entrarEmail} className="flex flex-col gap-3">
+        <input
+          type="email"
+          name="email"
+          value={email}
+          onChange={onInputChange}
+          placeholder="Email"
+          required
+          className="rounded border border-borde bg-superficie px-3 py-2"
+        />
+        <input
+          type="password"
+          name="password"
+          value={password}
+          onChange={onInputChange}
+          placeholder="Contraseña"
+          required
+          className="rounded border border-borde bg-superficie px-3 py-2"
+        />
+        <button type="submit" className="rounded bg-primario px-4 py-2 text-white">
+          Entrar
+        </button>
+      </form>
+
+      {error && <p className="text-primario">{error}</p>}
+
+      <Link to="/recuperar" className="text-tenue underline">
+        He olvidado mi contraseña
+      </Link>
+      <Link to="/registro" className="text-tenue underline">
+        Crear una cuenta
+      </Link>
+    </PantallaAcceso>
   )
 }

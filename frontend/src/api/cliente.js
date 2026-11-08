@@ -40,3 +40,5 @@ export const acceder = async (ruta, opciones = {}, reintentar = true) => {
 
   return resp
 }
+export const primerError = (datos) =>
+  datos.error ?? datos.detail ?? Object.values(datos)[0]?.[0] ?? 'Algo ha fallado'
