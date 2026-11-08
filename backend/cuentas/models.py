@@ -1,5 +1,11 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+SEXOS = (
+    ("H", "Hombre"),
+    ("M", "Mujer"),
+)
 
 
 class Perfil(models.Model):
@@ -7,6 +13,16 @@ class Perfil(models.Model):
     google_sub = models.CharField(max_length=255, unique=True, blank=True, null=True)
     google_foto = models.URLField(blank=True)
     foto_perfil = models.ImageField(upload_to="fotos_perfil/", blank=True)
+
+    fecha_nacimiento = models.DateField(null=True, blank=True)
+    sexo = models.CharField(max_length=1, choices=SEXOS, blank=True)
+    peso = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(10), MaxValueValidator(250)],
+    )
 
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email

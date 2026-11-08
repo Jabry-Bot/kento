@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.utils import timezone
 
 from .models import Perfil
 
@@ -19,3 +20,15 @@ class UsuarioSerializer(serializers.ModelSerializer):
         elif perfil.foto_perfil:
             return perfil.foto_perfil.url
         return perfil.google_foto or None
+
+
+class FichaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perfil
+        fields = ["fecha_nacimiento", "sexo", "peso"]
+
+    def validate_fecha_nacimiento(self,valor):
+        if valor and valor > timezone.localdate():
+            raise serializers.ValidationError("La fecha de nacimiento no puede ser futura")
+        return valor
+

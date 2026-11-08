@@ -43,3 +43,18 @@ def login_google(request):
 @api_view(["GET"])
 def yo(request):
     return Response(UsuarioSerializer(request.user).data)
+
+
+@api_view(["GET", "PATCH"])
+def ficha(request):
+    perfil = Perfil.objects.get_or_create(usuario=request.user)[0]
+
+    if request.method == "GET":
+        return Response(FichaSerializer(perfil).data)
+
+    ficha_srz = FichaSerializer(perfil, data=request.data, partial=True)
+    if not ficha_srz.is_valid():
+        return Response(ficha_srz.errors, status=400)
+
+    ficha_srz.save()
+    return Response(ficha_srz.data, status=200)
