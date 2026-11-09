@@ -43,7 +43,6 @@ export const Registro = () => {
 
   return (
     <PantallaAcceso titulo="Crear Cuenta">
-      {' '}
       <form onSubmit={registrarse} className="flex flex-col gap-3">
         <input
           name="first_name"

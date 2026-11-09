@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 
 # para IPs sin sesion.
 class LimiteAcceso(AnonRateThrottle):
-    rate = "5/min"
+    rate = "20/min"
 
 
 def resp_login(usuario):

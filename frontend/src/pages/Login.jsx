@@ -23,7 +23,7 @@ export const Login = () => {
     const datos = await resp.json()
 
     if (!resp.ok) {
-      setError(datos.error ?? 'No ha podido acceder')
+      setError(primerError(datos))
       return
     }
 
@@ -32,7 +32,7 @@ export const Login = () => {
 
   const entrarEmail = (e) => {
     e.preventDefault()
-    entrar('api/cuentas/login/', formState)
+    entrar('/api/cuentas/login/', formState)
   }
 
   return (
