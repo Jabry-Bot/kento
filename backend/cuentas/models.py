@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from datetime import date
+
 
 SEXOS = (
     ("H", "Hombre"),
@@ -26,6 +28,17 @@ class Perfil(models.Model):
 
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email
+
+    @property
+    def edad(self):
+        if not self.fecha_nacimiento:
+            return None
+        hoy = date.today()
+        cumplido = (hoy.month, hoy.day) >= (
+            self.fecha_nacimiento.month,
+            self.fecha_nacimiento.day,
+        )
+        return hoy.year - self.fecha_nacimiento.year - (0 if cumplido else 1)
 
     @classmethod
     def get_google(cls, datos):

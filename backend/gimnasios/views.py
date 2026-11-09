@@ -126,3 +126,42 @@ def aceptar_invitacion(request, codigo):
     invitacion.usos += 1
     invitacion.save()
     return Response(MembresiaSerializer(membresia).data, status=201)
+
+
+@api_view(["GET"])
+@permission_classes([EsEntrenador])
+def miembros(request, gimnasio_id):
+    membresias = Membresia.objects.filter(
+        gimnasio_id=gimnasio_id, active=True
+    ).order_by("rol")
+    return Response(MiembroSerailizer(membresias, many=True).data)
+
+
+@api_view(["DELETE"])
+@permission_classes([EsEntrenador])
+def dar_de_baja(request, gimnasio_id, membresia_id):
+    membresia = Membresia.objects.filter(
+        id=membresia_id, gimnasio_id=gimnasio_id, active=True
+    ).first()
+
+    if not membresia:
+        return Response({"error": "Este miembro no existe"}, status=404)
+
+    if membresia.rol != "alumno" and request.membresia.rol != "propietario":
+        return Response(
+            {"error": "Solo un propietario puede realizar esta accion"},
+            status=403,
+        )
+
+    if membresia.rol == "propietario":
+        propietarios = Membresia.objects.filter(
+            gimnasio_id=gimnasio_id, rol="propietario", active=True
+        ).count()
+        if propietarios < 2:
+            return Response(
+                {"error": "El gimnasio no puede quedar sin propietario"},
+                status=403,
+            )
+    membresia.active = False
+    membresia.save()
+    return Response(status=204)

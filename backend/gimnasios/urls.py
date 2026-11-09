@@ -17,4 +17,10 @@ urlpatterns = [
         views.aceptar_invitacion,
         name="aceptar_invitacion",
     ),
+    path("<int:gimnasio_id>/miembros/", views.miembros, name="miembros"),
+    path(
+        "<int:gimnasio_id>/miembros/<int:membresia_id>/",
+        views.dar_de_baja,
+        name="dar_de_baja",
+    ),
 ]
