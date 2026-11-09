@@ -12,7 +12,7 @@ export const Verificar = () => {
 
   const activar = async () => {
     const resp = await acceder(
-      `/api/cuentas/verificar/${usuarioId}/${token}`,
+      `/api/cuentas/verificar/${usuarioId}/${token}/`,
       { method: 'POST' },
       false,
     )
