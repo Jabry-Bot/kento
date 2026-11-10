@@ -48,6 +48,8 @@ export const SinGimnasio = ({ alCrear }) => {
       <button type="submit" className="rounded bg-primario px-4 py-2 text-white">
         Crear gimnasio
       </button>
+      <p className="text-tenue">¿Eres alumno? Pide el QR de invitación a tu entrenador.</p>
+
       {error && <p className="text-primario">{error}</p>}
     </form>
   )

@@ -23,4 +23,5 @@ urlpatterns = [
         views.dar_de_baja,
         name="dar_de_baja",
     ),
+    path("<int:gimnasio_id>/salir/", views.salir, name="salir"),
 ]

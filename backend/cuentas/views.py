@@ -172,3 +172,18 @@ def ficha(request):
 
     ficha_srz.save()
     return Response(ficha_srz.data, status=200)
+
+
+@api_view(["PATCH"])
+def foto(request):
+    perfil = Perfil.objects.get_or_create(usuario=request.user)[0]
+
+    foto_srz = FotoSerializer(perfil, data=request.data)
+    if not foto_srz.is_valid():
+        return Response(foto_srz.errors, status=400)
+
+    if perfil.foto_perfil:
+        perfil.foto_perfil.delete(save=False)
+
+    foto_srz.save()
+    return Response(UsuarioSerializer(request.user).data)

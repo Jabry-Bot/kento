@@ -15,6 +15,8 @@ export const useSesion = create(
       actualizarTokens: ({ access, refresh }) =>
         set((estadoActual) => ({ access, refresh: refresh ?? estadoActual.refresh })),
 
+      actualizarUsuario: (usuario) => set({ usuario }),
+
       logout: () => set({ estado: 'no-autenticado', usuario: null, access: null, refresh: null }),
     }),
     { name: 'sesion' },

@@ -165,3 +165,24 @@ def dar_de_baja(request, gimnasio_id, membresia_id):
     membresia.active = False
     membresia.save()
     return Response(status=204)
+
+
+@api_view(["POST"])
+@permission_classes([EsMiembro])
+def salir(request, gimnasio_id):
+    membresia = request.membresia
+
+    if membresia.rol == "propietario":
+        propietarios = Membresia.objects.filter(
+            gimnasio_id=gimnasio_id, rol="propietario", active=True
+        ).count()
+        if propietarios < 2:
+            return Response(
+                {
+                    "error": "Eres el unico propietario activo, no puede salir del gimnasio"
+                },
+                status=403,
+            )
+    membresia.active = False
+    membresia.save()
+    return Response(status=204)

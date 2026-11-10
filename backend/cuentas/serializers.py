@@ -61,3 +61,15 @@ class RegistroSerializer(serializers.ModelSerializer):
         )
         Perfil.objects.create(usuario=usuario)
         return usuario
+
+
+class FotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perfil
+        fields = ["foto_perfil"]
+        extra_kwargs = {"foto_perfil": {"required": True}}
+
+    def validate_foto_perfil(self, foto):
+        if foto.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError("La foto no puede pasar de 10 MB")
+        return foto
