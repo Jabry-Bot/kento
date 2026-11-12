@@ -10,6 +10,7 @@ import { Recuperar } from '../pages/Recuperar'
 import { Registro } from '../pages/Registro'
 import { Verificar } from '../pages/Verificar'
 import { NuevaContrasena } from '../pages/NuevaContrasena'
+import { MarcoApp } from '../components/MarcoApp'
 
 export const RutasApp = () => {
   return (
@@ -21,9 +22,11 @@ export const RutasApp = () => {
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/gimnasios/:gimnasioId" element={<Gimnasio />} />
-        <Route path="/perfil" element={<Perfil />} />
+        <Route element={<MarcoApp />}>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/gimnasios/:gimnasioId" element={<Gimnasio />} />
+          <Route path="/perfil" element={<Perfil />} />
+        </Route>
       </Route>
 
       <Route path="/invitacion/:codigo" element={<Invitacion />} />

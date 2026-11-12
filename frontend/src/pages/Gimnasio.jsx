@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { acceder } from '../api/cliente'
 import { Invitaciones } from '../components/Invitaciones'
 import { Miembros } from '../components/Miembros'
@@ -39,14 +39,7 @@ export const Gimnasio = () => {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-6 bg-fondo p-6">
-      <header className="flex w-full max-w-sm items-center justify-between">
-        <Link to="/" className="text-tenue underline">
-          Volver
-        </Link>
-        <p className="text-tenue">{membresia.rol}</p>
-      </header>
-
+    <>
       <h1 className="text-2xl font-bold text-tinta">{membresia.gimnasio.nombre}</h1>
       {puedeInvitar && <Miembros gimnasioId={gimnasioId} rol={membresia.rol} />}
       {puedeInvitar && <Invitaciones gimnasioId={gimnasioId} rol={membresia.rol} />}
@@ -54,6 +47,6 @@ export const Gimnasio = () => {
         Salir del gimnasio
       </button>
       {error && <p className="text-primario">{error}</p>}
-    </main>
+    </>
   )
 }

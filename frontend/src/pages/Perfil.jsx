@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
 import { acceder, primerError } from '../api/cliente'
 import { FormularioFicha } from '../components/FormularioFicha'
 import { useSesion } from '../stores/useSesion'
@@ -33,12 +32,7 @@ export const Perfil = () => {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-6 bg-fondo p-6">
-      <header className="flex w-full max-w-sm items-center justify-between">
-        <Link to="/" className="text-tenue underline">
-          Volver
-        </Link>
-      </header>
+    <>
       {usuario?.foto && (
         <img src={usuario.foto} alt="" className="h-24 w-24 rounded-full object-cover" />
       )}
@@ -60,6 +54,6 @@ export const Perfil = () => {
       ) : (
         <FormularioFicha ficha={ficha} />
       )}
-    </main>
+    </>
   )
 }
