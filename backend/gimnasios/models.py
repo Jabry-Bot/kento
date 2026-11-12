@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-
 ROLES = (
     ("propietario", "Propietario"),
     ("entrenador", "Entrenador"),
@@ -66,3 +65,42 @@ class Invitacion(models.Model):
 
     def __str__(self):
         return f"{self.gimnasio} // ({self.rol} -> {self.codigo})"
+
+
+ESTADOS_SOLICITUD = (
+    ("pendiente", "Pendiente"),
+    ("aceptada", "Aceptada"),
+    ("rechazada", "Rechazada"),
+)
+
+
+class Solicitud(models.Model):
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="solicitudes"
+    )
+    gimnasio = models.ForeignKey(
+        Gimnasio, on_delete=models.CASCADE, related_name="solicitudes"
+    )
+    estado = models.CharField(
+        max_length=15, choices=ESTADOS_SOLICITUD, default="pendiente"
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario} -> {self.gimnasio} ({self.estado})"
+
+    def resolver_solicitud(self, estado):
+        self.estado = estado
+        self.save()
+        if self.estado == "aceptada":
+            membresia, creada = Membresia.objects.get_or_create(
+                usuario=self.usuario,
+                gimnasio=self.gimnasio,
+                defaults={"rol": "alumno"},
+            )
+            if not creada and not membresia.active:
+                membresia.active = True
+                membresia.rol = "alumno"
+                membresia.save()
+                return self.estado
+        return self.estado

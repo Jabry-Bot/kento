@@ -39,3 +39,11 @@ class MiembroSerializer(serializers.ModelSerializer):
         if not perfil:
             return {"edad": None, "sexo": "", "peso": None}
         return {"edad": perfil.edad, "sexo": perfil.sexo, "peso": perfil.peso}
+
+
+class SolicitudSerializer(serializers.ModelSerializer):
+    usuario = UsuarioSerializer(read_only=True)
+
+    class Meta:
+        model = Solicitud
+        fields = ["id", "usuario", "fecha"]

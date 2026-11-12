@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import { acceder } from '../api/cliente'
 import { Invitaciones } from '../components/Invitaciones'
 import { Miembros } from '../components/Miembros'
+import { Solicitudes } from '../components/Solicitudes'
 
 export const Gimnasio = () => {
   const { gimnasioId } = useParams()
@@ -41,6 +42,7 @@ export const Gimnasio = () => {
   return (
     <>
       <h1 className="text-2xl font-bold text-tinta">{membresia.gimnasio.nombre}</h1>
+      {puedeInvitar && <Solicitudes gimnasioId={gimnasioId} />}
       {puedeInvitar && <Miembros gimnasioId={gimnasioId} rol={membresia.rol} />}
       {puedeInvitar && <Invitaciones gimnasioId={gimnasioId} rol={membresia.rol} />}
       <button onClick={salir} className="text-primario underline">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { acceder } from '../api/cliente'
 import { SinGimnasio } from '../components/SinGimnasio'
+import { BuscarGimnasio } from '../components/BuscarGimnasio'
 
 export const Inicio = () => {
   const [membresias, setMembresias] = useState(null)
@@ -20,22 +21,26 @@ export const Inicio = () => {
 
   if (membresias === null) return <p className="text-tenue">Cargando...</p>
 
-  // El marco ya pone la cabecera y el <main>: aquí solo va el contenido.
-  if (membresias.length === 0) return <SinGimnasio alCrear={alCrear} />
-
   return (
-    <ul className="flex w-full max-w-sm flex-col gap-2">
-      {membresias.map((membresia) => (
-        <li key={membresia.id}>
-          <Link
-            to={`/gimnasios/${membresia.gimnasio.id}`}
-            className="block rounded border border-borde bg-superficie p-3"
-          >
-            <p className="font-bold text-tinta">{membresia.gimnasio.nombre}</p>
-            <p className="text-tenue">{membresia.rol}</p>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <>
+      {membresias.length === 0 ? (
+        <SinGimnasio alCrear={alCrear} />
+      ) : (
+        <ul className="flex w-full max-w-sm flex-col gap-2">
+          {membresias.map((membresia) => (
+            <li key={membresia.id}>
+              <Link
+                to={`/gimnasios/${membresia.gimnasio.id}`}
+                className="block rounded border border-borde bg-superficie p-3"
+              >
+                <p className="font-bold text-tinta">{membresia.gimnasio.nombre}</p>
+                <p className="text-tenue">{membresia.rol}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      <BuscarGimnasio />
+    </>
   )
 }

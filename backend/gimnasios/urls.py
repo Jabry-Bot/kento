@@ -24,4 +24,12 @@ urlpatterns = [
         name="dar_de_baja",
     ),
     path("<int:gimnasio_id>/salir/", views.salir, name="salir"),
+    path("buscar/", views.buscar_gimnasios, name="buscar_gimnasios"),
+    path("<int:gimnasio_id>/solicitar/", views.solicitar, name="solicitar"),
+    path("<int:gimnasio_id>/solicitudes/", views.solicitudes, name="solicitudes"),
+    path(
+        "<int:gimnasio_id>/solicitudes/<int:solicitud_id>/",
+        views.responder_solicitud,
+        name="responder_solicitud",
+    ),
 ]

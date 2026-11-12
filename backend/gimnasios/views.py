@@ -1,9 +1,14 @@
+from datetime import timedelta
+
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from .models import Membresia, Invitacion
+
+from .models import *
 from .permisos import *
 from .serializers import *
-from rest_framework.permissions import AllowAny
 
 
 @api_view(["GET", "POST"])
@@ -185,4 +190,65 @@ def salir(request, gimnasio_id):
             )
     membresia.active = False
     membresia.save()
+    return Response(status=204)
+
+
+@api_view(["GET"])
+def buscar_gimnasios(request):
+    texto = request.query_params.get("q", "").strip()
+    if len(texto) < 2:
+        return Response([])
+
+    gimnasios = Gimnasio.objects.filter(
+        Q(nombre__icontains=texto) | Q(ciudad__icontains=texto)
+    )[:20]
+    return Response(GimnasioSerializer(gimnasios, many=True).data)
+
+
+@api_view(["POST"])
+def solicitar(request, gimnasio_id):
+    refresco = timezone.now() - timedelta(days=30)
+    gimnasio = Gimnasio.objects.filter(id=gimnasio_id).first()
+    if not gimnasio:
+        return Response({"error": "Este gimnasio no existe"}, status=404)
+
+    if Membresia.objects.filter(
+        usuario=request.user, gimnasio=gimnasio, active=True
+    ).exists():
+        return Response({"error": "Ya eres miembro del gimnasio"}, status=400)
+    if gimnasio.solicitudes.filter(
+        Q(estado="pendiente") | Q(estado="rechazada", fecha__gte=refresco),
+        usuario=request.user,
+    ):
+        return Response(
+            {"error": "No puedes volver a solicitar este gimnasio"}, status=403
+        )
+
+    gimnasio.solicitudes.create(usuario=request.user)
+    return Response({"mensaje": "Solicitud enviada"}, status=201)
+
+
+@api_view(["GET"])
+@permission_classes([EsEntrenador])
+def solicitudes(request, gimnasio_id):
+    pendientes = Solicitud.objects.filter(
+        gimnasio_id=gimnasio_id, estado="pendiente"
+    ).order_by("fecha")
+    return Response(SolicitudSerializer(pendientes, many=True).data)
+
+
+@api_view(["PATCH"])
+@permission_classes([EsEntrenador])
+def responder_solicitud(request, gimnasio_id, solicitud_id):
+    solicitud = Solicitud.objects.filter(
+        id=solicitud_id, gimnasio_id=gimnasio_id, estado="pendiente"
+    ).first()
+    if not solicitud:
+        return Response({"error": "Esta solicitud no existe"}, status=404)
+
+    estado = request.data.get("estado")
+    if estado not in ("aceptada", "rechazada"):
+        return Response({"error": "Ese estado no existe"}, status=400)
+
+    solicitud.resolver_solicitud(estado)
     return Response(status=204)
