@@ -1,6 +1,7 @@
-from rest_framework import serializers
 from cuentas.models import Perfil
 from cuentas.serializers import UsuarioSerializer
+from rest_framework import serializers
+
 from .models import *
 
 
@@ -25,7 +26,7 @@ class InvitacionSerializer(serializers.ModelSerializer):
         read_only_fields = ["codigo", "usos", "active"]
 
 
-class MiembroSerailizer(serializers.ModelSerializer):
+class MiembroSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
     ficha = serializers.SerializerMethodField()
 

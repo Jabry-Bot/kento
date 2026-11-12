@@ -134,7 +134,7 @@ def miembros(request, gimnasio_id):
     membresias = Membresia.objects.filter(
         gimnasio_id=gimnasio_id, active=True
     ).order_by("rol")
-    return Response(MiembroSerailizer(membresias, many=True).data)
+    return Response(MiembroSerializer(membresias, many=True).data)
 
 
 @api_view(["DELETE"])
