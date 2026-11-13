@@ -32,4 +32,12 @@ urlpatterns = [
         views.responder_solicitud,
         name="responder_solicitud",
     ),
+    path(
+        "<int:gimnasio_id>/amonestaciones/", views.amonestaciones, name="amonestaciones"
+    ),
+    path(
+        "<int:gimnasio_id>/amonestaciones/<int:amonestacion_id>/",
+        views.borrar_amonestacion,
+        name="borrar_amonestacion",
+    ),
 ]

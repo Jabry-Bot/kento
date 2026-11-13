@@ -252,3 +252,52 @@ def responder_solicitud(request, gimnasio_id, solicitud_id):
 
     solicitud.resolver_solicitud(estado)
     return Response(status=204)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([EsMiembro])
+def amonestaciones(request, gimnasio_id):
+    if request.method == "GET":
+        amonestados = Amonestacion.objects.filter(gimnasio_id=gimnasio_id)
+
+        if request.membresia.rol == "alumno":
+            amonestados = amonestados.filter(alumno=request.user)
+        else:
+            alumno_id = request.query_params.get("alumno", "")
+            if alumno_id.isdigit():
+                amonestados = amonestados.filter(alumno_id=alumno_id)
+
+        return Response(AmonestacionSerializer(amonestados, many=True).data)
+
+    if request.membresia.rol == "alumno":
+        return Response(
+            {"error": "Solo los entrenadores pueden poner amonestaciones"}, status=403
+        )
+
+    amonestacion_srz = AmonestacionSerializer(data=request.data)
+    if not amonestacion_srz.is_valid():
+        return Response(amonestacion_srz.errors, status=400)
+
+    alumno = amonestacion_srz.validated_data["alumno"]
+    es_alumno = Membresia.objects.filter(
+        gimnasio_id=gimnasio_id, usuario=alumno, rol="alumno", active=True
+    ).exists()
+    if not es_alumno:
+        return Response(
+            {"error": "Este alumno no pertenece a este gimnasio"}, status=400
+        )
+
+    amonestacion_srz.save(gimnasio_id=gimnasio_id, autor=request.user)
+    return Response(amonestacion_srz.data, status=201)
+
+
+@api_view(["DELETE"])
+@permission_classes([EsEntrenador])
+def borrar_amonestacion(request, gimnasio_id, amonestacion_id):
+    amonestacion = Amonestacion.objects.filter(
+        id=amonestacion_id, gimnasio_id=gimnasio_id
+    ).first()
+    if not amonestacion:
+        return Response({"error": "Esta amonestación no existe"}, status=404)
+    amonestacion.delete()
+    return Response(status=204)

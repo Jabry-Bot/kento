@@ -47,3 +47,21 @@ class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = ["id", "usuario", "fecha"]
+
+
+class AmonestacionSerializer(serializers.ModelSerializer):
+    alumno_nombre = serializers.CharField(source="alumno.get_full_name", read_only=True)
+    autor_nombre = serializers.CharField(source="autor.get_full_name", read_only=True)
+
+    class Meta:
+        model = Amonestacion
+        fields = [
+            "id",
+            "alumno",
+            "alumno_nombre",
+            "autor",
+            "autor_nombre",
+            "motivo",
+            "gravedad",
+            "fecha",
+        ]

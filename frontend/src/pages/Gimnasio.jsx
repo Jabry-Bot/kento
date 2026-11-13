@@ -4,6 +4,7 @@ import { acceder } from '../api/cliente'
 import { Invitaciones } from '../components/Invitaciones'
 import { Miembros } from '../components/Miembros'
 import { Solicitudes } from '../components/Solicitudes'
+import { Amonestaciones } from '../components/Amonestaciones'
 
 export const Gimnasio = () => {
   const { gimnasioId } = useParams()
@@ -45,6 +46,8 @@ export const Gimnasio = () => {
       {puedeInvitar && <Solicitudes gimnasioId={gimnasioId} />}
       {puedeInvitar && <Miembros gimnasioId={gimnasioId} rol={membresia.rol} />}
       {puedeInvitar && <Invitaciones gimnasioId={gimnasioId} rol={membresia.rol} />}
+      <Amonestaciones gimnasioId={gimnasioId} rol={membresia.rol} />
+
       <button onClick={salir} className="text-primario underline">
         Salir del gimnasio
       </button>

@@ -104,3 +104,37 @@ class Solicitud(models.Model):
                 membresia.save()
                 return self.estado
         return self.estado
+
+
+GRAVEDADES = (
+    ("leve", "Leve"),
+    ("grave", "Grave"),
+)
+
+
+class Amonestacion(models.Model):
+    gimnasio = models.ForeignKey(
+        Gimnasio, on_delete=models.CASCADE, related_name="amonestaciones"
+    )
+    alumno = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="amonestaciones"
+    )
+    autor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="amonestaciones_puestas",
+    )
+    motivo = models.CharField(max_length=255)
+    gravedad = models.CharField(
+        max_length=15, choices=GRAVEDADES, blank=False, default="leve"
+    )
+    fecha = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = [
+            "-fecha",
+        ]
+
+    def __str__(self):
+        return f"{self.alumno} - {self.gravedad} ({self.fecha})"

@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(Gimnasio)
 admin.site.register(Membresia)
 admin.site.register(Invitacion)
+admin.site.register(Amonestacion)
