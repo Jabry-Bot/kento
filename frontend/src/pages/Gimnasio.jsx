@@ -6,6 +6,7 @@ import { Miembros } from '../components/Miembros'
 import { Solicitudes } from '../components/Solicitudes'
 import { Amonestaciones } from '../components/Amonestaciones'
 import { EnviarAviso } from '../components/EnviarAviso'
+import { Panel } from '../components/Panel'
 
 export const Gimnasio = () => {
   const { gimnasioId } = useParams()
@@ -44,6 +45,7 @@ export const Gimnasio = () => {
   return (
     <>
       <h1 className="text-2xl font-bold text-tinta">{membresia.gimnasio.nombre}</h1>
+      {puedeInvitar && <Panel gimnasioId={gimnasioId} />}
       {puedeInvitar && <Solicitudes gimnasioId={gimnasioId} />}
       {puedeInvitar && <EnviarAviso gimnasioId={gimnasioId} />}
       {puedeInvitar && <Miembros gimnasioId={gimnasioId} rol={membresia.rol} />}

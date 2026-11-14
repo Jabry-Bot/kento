@@ -358,3 +358,26 @@ def enviar_aviso(request, gimnasio_id):
             enlace=f"/gimnasios/{gimnasio_id}",
         )
     return Response({"enviados": len(alumnos)}, status=201)
+
+
+@api_view(["GET"])
+@permission_classes([EsEntrenador])
+def datos_entrenador(request, gimnasio_id):
+    hoy = timezone.localdate()
+    alumnos = Membresia.objects.filter(
+        gimnasio_id=gimnasio_id, rol="alumno", active=True
+    )
+    return Response(
+        {
+            "alumnos": alumnos.count(),
+            "altas_30_dias": alumnos.filter(
+                fecha_alta__date__gte=hoy - timedelta(days=30)
+            ).count(),
+            "solicitudes": Solicitud.objects.filter(
+                gimnasio_id=gimnasio_id, estado="pendiente"
+            ).count(),
+            "amonestaciones_90_dias": Amonestacion.objects.filter(
+                gimnasio_id=gimnasio_id, fecha__gte=hoy - timedelta(days=90)
+            ).count(),
+        }
+    )

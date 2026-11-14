@@ -41,4 +41,5 @@ urlpatterns = [
         name="borrar_amonestacion",
     ),
     path("<int:gimnasio_id>/avisos/", views.enviar_aviso, name="enviar_aviso"),
+    path("<int:gimnasio_id>/datos/", views.datos_entrenador, name="datos_entrenador"),
 ]
