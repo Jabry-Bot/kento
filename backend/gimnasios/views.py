@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
+from notificaciones.models import Notificacion
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -104,6 +105,7 @@ def ver_invitacion(request, codigo):
     )
 
 
+# Mas adelante convertirlo en un metodo de Invitacion
 @api_view(["POST"])
 def aceptar_invitacion(request, codigo):
     invitacion = Invitacion.objects.filter(codigo=codigo).first()
@@ -130,6 +132,13 @@ def aceptar_invitacion(request, codigo):
 
     invitacion.usos += 1
     invitacion.save()
+    if membresia.rol == "alumno":
+        Notificacion.avisar_entrenadores(
+            invitacion.gimnasio_id,
+            "Alumno nuevo",
+            f"{request.user.get_full_name() or request.user.email} se ha unido",
+            f"/gimnasios/{invitacion.gimnasio_id}",
+        )
     return Response(MembresiaSerializer(membresia).data, status=201)
 
 
@@ -225,6 +234,12 @@ def solicitar(request, gimnasio_id):
         )
 
     gimnasio.solicitudes.create(usuario=request.user)
+    Notificacion.avisar_entrenadores(
+        gimnasio.id,
+        "Solicitud nueva",
+        f"{request.user.get_full_name() or request.user.email} quiere unirse",
+        f"/gimnasios/{gimnasio.id}",
+    )
     return Response({"mensaje": "Solicitud enviada"}, status=201)
 
 
@@ -251,6 +266,13 @@ def responder_solicitud(request, gimnasio_id, solicitud_id):
         return Response({"error": "Ese estado no existe"}, status=400)
 
     solicitud.resolver_solicitud(estado)
+    aceptada = estado == "aceptada"
+    Notificacion.objects.create(
+        usuario=solicitud.usuario,
+        titulo=f"Solicitud {estado}",
+        texto=f"{solicitud.gimnasio.nombre} ha {'aceptado' if aceptada else 'rechazado'} tu solicitud",
+        enlace=f"/gimnasios/{gimnasio_id}" if aceptada else "/",
+    )
     return Response(status=204)
 
 
@@ -287,7 +309,14 @@ def amonestaciones(request, gimnasio_id):
             {"error": "Este alumno no pertenece a este gimnasio"}, status=400
         )
 
-    amonestacion_srz.save(gimnasio_id=gimnasio_id, autor=request.user)
+    amonestacion = amonestacion_srz.save(gimnasio_id=gimnasio_id, autor=request.user)
+
+    Notificacion.objects.create(
+        usuario=alumno,
+        titulo="Amonestacion",
+        texto=f"{amonestacion.gravedad}: {amonestacion.motivo}",
+        enlace=f"/gimnasios/{gimnasio_id}",
+    )
     return Response(amonestacion_srz.data, status=201)
 
 
