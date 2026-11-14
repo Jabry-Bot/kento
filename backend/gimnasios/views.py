@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from notificaciones.models import Notificacion
@@ -330,3 +331,30 @@ def borrar_amonestacion(request, gimnasio_id, amonestacion_id):
         return Response({"error": "Esta amonestación no existe"}, status=404)
     amonestacion.delete()
     return Response(status=204)
+
+
+@api_view(["POST"])
+@permission_classes([EsEntrenador])
+def enviar_aviso(request, gimnasio_id):
+    aviso_srz = AvisoSerializer(data=request.data)
+    if not aviso_srz.is_valid():
+        return Response(aviso_srz.errors, status=400)
+    datos = aviso_srz.validated_data
+    alumnos = User.objects.filter(
+        membresias__gimnasio_id=gimnasio_id,
+        membresias__rol="alumno",
+        membresias__active=True,
+    )
+    if "alumno" in datos:
+        alumnos = alumnos.filter(id=datos["alumno"])
+        if not alumnos.exists():
+            return Response({"error": "Ese alumno no es de este gimnasio"}, status=400)
+
+    for alumno in alumnos:
+        Notificacion.objects.create(
+            usuario=alumno,
+            titulo=datos["titulo"],
+            texto=datos.get("texto", ""),
+            enlace=f"/gimnasios/{gimnasio_id}",
+        )
+    return Response({"enviados": len(alumnos)}, status=201)

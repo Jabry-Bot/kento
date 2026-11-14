@@ -40,4 +40,5 @@ urlpatterns = [
         views.borrar_amonestacion,
         name="borrar_amonestacion",
     ),
+    path("<int:gimnasio_id>/avisos/", views.enviar_aviso, name="enviar_aviso"),
 ]

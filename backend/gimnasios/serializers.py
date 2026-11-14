@@ -65,3 +65,9 @@ class AmonestacionSerializer(serializers.ModelSerializer):
             "gravedad",
             "fecha",
         ]
+
+
+class AvisoSerializer(serializers.Serializer):
+    titulo = serializers.CharField(max_length=100)
+    texto = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    alumno = serializers.IntegerField(required=False)
