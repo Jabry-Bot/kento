@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, Outlet } from 'react-router'
 import { acceder } from '../api/cliente'
 import { useSesion } from '../stores/useSesion'
+import { Campana } from './Campana'
 
 export const MarcoApp = () => {
   const usuario = useSesion((sesion) => sesion.usuario)
@@ -24,6 +25,7 @@ export const MarcoApp = () => {
         </Link>
 
         <div className="flex items-center gap-4">
+          <Campana />
           <Link to="/perfil" className="flex items-center gap-2 text-tinta">
             {usuario?.foto && (
               <img src={usuario.foto} alt="" className="h-8 w-8 rounded-full object-cover" />
