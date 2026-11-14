@@ -1,17 +1,18 @@
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import *
-from .models import Perfil
-from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from rest_framework.throttling import AnonRateThrottle
-from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Perfil
+from .serializers import *
 
 
 # para IPs sin sesion.
@@ -70,7 +71,11 @@ def login_google(request):
 
     try:
         datos = id_token.verify_oauth2_token(
-            credencial, google_requests.Request(), settings.GOOGLE_CLIENT_ID
+            credencial,
+            google_requests.Request(),
+            settings.GOOGLE_CLIENT_ID,
+            # Solucion para el desfase temporal
+            clock_skew_in_seconds=10,
         )
     except ValueError:
         return Response({"error": "Token de Google no válido"}, status=401)
