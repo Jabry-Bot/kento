@@ -24,9 +24,10 @@ class Requisito:
 
         for clave, obligatorio in self.parametros.items():
             valor = parametros.get(clave)
-            if valor and obligatorio:
-                raise ValidationError(f"{self.texto}: falta {clave}")
-
+            if not valor:
+                if obligatorio:
+                    raise ValidationError(f"{self.texto}: falta {clave}")
+                continue
             if type(valor) is not int or valor < 0:
                 raise ValidationError(f"{clave} tiene que ser un entero positivo")
 

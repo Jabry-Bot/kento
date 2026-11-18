@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
 from gimnasios.models import Gimnasio
+
 from .requisitos import OPCIONES, TIPOS
 
 TIPOS_ASCENSO = (
@@ -41,7 +43,11 @@ class Disciplina(models.Model):
         blank=True,
         related_name="disciplinas",
     )
-    arte = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100)
+    arte = models.ForeignKey(
+        ArteMarcial, on_delete=models.PROTECT, related_name="disciplinas"
+    )
+
     plantilla_origen = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -121,27 +127,149 @@ class Requisito(models.Model):
 
 class Objetivo(models.Model):
     grado = models.ForeignKey(Grado, on_delete=models.CASCADE, related_name="objetivos")
+    bloque = models.ForeignKey(
+        Bloque, on_delete=models.CASCADE, related_name="objetivos"
+    )
+    titulo = models.CharField(max_length=150)
+    descripcion = models.TextField(blank=True)
+    video = models.URLField(blank=True)
+    obligatorio = models.BooleanField(default=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["orden"]
+
+    def __str__(self):
+        return self.titulo
 
 
 class Licencia(models.Model):
-    pass
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="licencias"
+    )
+    arte = models.ForeignKey(ArteMarcial, on_delete=models.CASCADE)
+    anio = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["anio"]
+        unique_together = ("usuario", "arte", "anio")
+
+    def __str__(self):
+        return f"{self.usuario} - {self.arte} {self.anio}"
 
 
+# Con esto puedo asignar la Disciplina al alumno si se cambia
 class DisciplinaAlumno(models.Model):
-    pass
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="disciplinas"
+    )
+    disciplina = models.ForeignKey(
+        Disciplina, on_delete=models.CASCADE, related_name="alumnos"
+    )
+    active = models.BooleanField(default=True)
+    fecha_alta = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("usuario", "disciplina")
+
+    def __str__(self):
+        return f"{self.usuario} - {self.disciplina}"
+
+    @classmethod
+    def apuntar(cls, usuario, disciplina, grado):
+        inscripcion = cls.objects.create(usuario=usuario, disciplina=disciplina)
+        inscripcion.ascender(grado, "inicial")
+        return inscripcion
+
+    def grado_actual(self):
+        return (
+            HistorialGrado.objects.filter(
+                usuario=self.usuario, grado__disciplina=self.disciplina
+            )
+            .last()
+            .grado
+        )
+
+    def ascender(self, grado, motivo, examen=None):
+        if grado.disciplina_id != self.disciplina_id:
+            raise ValidationError("Ese grado no es de esta disciplina")
+        if grado.subgrados.exists():
+            raise ValidationError("Este grado no es valido")
+        return HistorialGrado.objects.create(
+            usuario=self.usuario, grado=grado, motivo=motivo, examen=examen
+        )
 
 
 class Progreso(models.Model):
-    pass
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="progresos"
+    )
+    objetivo = models.ForeignKey(
+        Objetivo, on_delete=models.CASCADE, related_name="progresos"
+    )
+    estado = models.CharField(
+        max_length=15, choices=ESTADOS_PROGRESO, default="pendiente"
+    )
+    nota = models.TextField(blank=True)
+    evaluador = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="evaluaciones",
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("usuario", "objetivo")
+
+    def __str__(self):
+        return f"{self.usuario} - {self.objetivo}: {self.estado}"
 
 
 class Examen(models.Model):
-    pass
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="examenes")
+    grado = models.ForeignKey(Grado, on_delete=models.CASCADE, related_name="examenes")
+    fecha = models.DateField(auto_now_add=True)
+    evaluador = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="examenes_evaluados",
+    )
+
+    def __str__(self):
+        return f"{self.usuario} - {self.grado} ({self.fecha})"
 
 
 class ResultadoBloque(models.Model):
-    pass
+    examen = models.ForeignKey(
+        Examen, on_delete=models.CASCADE, related_name="resultados"
+    )
+    bloque = models.ForeignKey(Bloque, on_delete=models.PROTECT)
+    aprobado = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("examen", "bloque")
+
+    def __str__(self):
+        return f"{self.examen} - {self.bloque.nombre}: {'apto' if self.aprobado else 'no apto'}"
 
 
 class HistorialGrado(models.Model):
-    pass
+    usuario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="historial_grados"
+    )
+    grado = models.ForeignKey(Grado, on_delete=models.PROTECT, related_name="historial")
+    fecha = models.DateField(auto_now_add=True)
+    motivo = models.CharField(max_length=15, choices=MOTIVOS_ASCENSO)
+    examen = models.ForeignKey(Examen, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ["fecha", "id"]
+        indexes = [models.Index(fields=["usuario", "fecha"])]
+
+    def clean(self):
+        if self.grado.subgrados.exists():
+            raise ValidationError("Este grado no es valido")
